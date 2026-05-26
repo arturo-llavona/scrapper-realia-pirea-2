@@ -1,64 +1,80 @@
 # script-realia
 
-Paquete listo para desplegar el scraper de Realia con web + histórico + Telegram.
+Despliegue sin tarjeta usando GitHub Actions + GitHub Pages.
 
-## Incluye
+## Qué hace este paquete
 
-- `scrapper.py`
-- `requirements.txt`
-- `.env.example`
-- `realia.service` (systemd para Linux)
-- `.gitignore`
+1. Ejecuta el scraping cada 30 minutos con GitHub Actions.
+2. Guarda histórico y detecta cambios de precio.
+3. Publica la web estática en GitHub Pages.
+4. Envía notificación Telegram cuando hay cambios.
 
-## 1) Ejecución local (Windows)
+## Estructura importante
+
+1. `scrapper.py`: lógica de scraping, histórico y Telegram.
+2. `.github/workflows/realia-scrape.yml`: workflow automático cada 30 minutos.
+3. `docs/index.html`: frontend estático para GitHub Pages.
+4. `docs/data/*.json`: datos que actualiza el workflow.
+
+## Paso 1: crear repositorio en GitHub
+
+1. Crea una cuenta en GitHub (sin tarjeta).
+2. Crea un repo nuevo, por ejemplo `script-realia`.
+3. Sube el contenido de esta carpeta.
+
+## Paso 2: configurar Secrets
+
+En tu repo:
+
+1. Ve a `Settings`.
+2. Ve a `Secrets and variables` > `Actions`.
+3. Crea estos secretos:
+4. `TELEGRAM_BOT_TOKEN`
+5. `TELEGRAM_CHAT_ID`
+
+Si no quieres Telegram, puedes dejar los secretos sin configurar y el script seguirá funcionando sin notificar.
+
+## Paso 3: activar GitHub Pages
+
+1. Ve a `Settings` > `Pages`.
+2. En Source selecciona `Deploy from a branch`.
+3. Elige `main` y carpeta `/docs`.
+4. Guarda.
+
+La URL quedará como:
+
+`https://TU_USUARIO.github.io/TU_REPO/`
+
+## Paso 4: lanzar el primer workflow
+
+1. Ve a `Actions`.
+2. Abre `Realia Scraper`.
+3. Pulsa `Run workflow`.
+
+Esto generará:
+
+1. `docs/data/snapshots.json`
+2. `docs/data/changes.json`
+3. `docs/data/status.json`
+4. `realia_data/last_run.json`
+
+## Paso 5: validación
+
+1. Comprueba que el workflow termina en verde.
+2. Abre la URL de GitHub Pages.
+3. Verifica que se ve la tabla y la última ejecución.
+
+## Ejecución local opcional
 
 ```powershell
 python -m venv .venv
 . .\.venv\Scripts\Activate.ps1
 pip install -r requirements.txt
 
-# O por variables de entorno de sesión
-$env:TELEGRAM_BOT_TOKEN="TU_TOKEN"
-$env:TELEGRAM_CHAT_ID="TU_CHAT_ID"
-
-python .\scrapper.py --serve --insecure --interval-minutes 30 --host 127.0.0.1 --port 8010 --out .\realia_data\last_run.json
-```
-
-## 2) Ejecución local (Linux)
-
-```bash
-python3 -m venv .venv
-source .venv/bin/activate
-pip install -r requirements.txt
-
-export TELEGRAM_BOT_TOKEN="TU_TOKEN"
-export TELEGRAM_CHAT_ID="TU_CHAT_ID"
-
-python scrapper.py --serve --insecure --interval-minutes 30 --host 0.0.0.0 --port 8010 --out ./realia_data/last_run.json
-```
-
-## 3) Despliegue en servidor Linux con systemd
-
-1. Copia esta carpeta a `/opt/realia`.
-2. Crea `/opt/realia/.env` a partir de `.env.example`.
-3. Crea venv e instala dependencias.
-4. Copia `realia.service` a `/etc/systemd/system/realia.service`.
-5. Activa servicio:
-
-```bash
-sudo systemctl daemon-reload
-sudo systemctl enable realia
-sudo systemctl start realia
-sudo systemctl status realia
-```
-
-Logs:
-
-```bash
-sudo journalctl -u realia -f
+python .\scrapper.py --insecure --skip-pdf --out .\realia_data\last_run.json --export-static .\docs\data
 ```
 
 ## Notas de seguridad
 
-- No subas `.env` al repositorio.
-- Si has compartido el token del bot, regénéralo en BotFather.
+1. No subas `.env` al repositorio.
+2. Si el token de Telegram se compartió, regénéralo en BotFather.

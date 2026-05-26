@@ -402,6 +402,7 @@ def query_snapshots(limit: int = 500) -> list[dict[str, Any]]:
 				square_meters,
 				garage_spots,
 				storage_room,
+				plan_pdf_url,
 				plan_pdf_local_path
 			FROM snapshots
 			ORDER BY execution_date DESC, typology ASC
@@ -415,8 +416,45 @@ def query_snapshots(limit: int = 500) -> list[dict[str, Any]]:
 		entry = dict(row)
 		entry["price_changed"] = bool(entry["price_changed"])
 		entry["has_pdf"] = bool(entry.get("plan_pdf_local_path"))
+		entry["has_pdf_url"] = bool(entry.get("plan_pdf_url"))
 		result.append(entry)
 	return result
+
+
+def get_last_run() -> dict[str, Any] | None:
+	init_db()
+	with get_db() as conn:
+		row = conn.execute(
+			"""
+			SELECT execution_date, executed_at, url, units_count
+			FROM runs
+			ORDER BY executed_at DESC
+			LIMIT 1
+			"""
+		).fetchone()
+	return dict(row) if row else None
+
+
+def export_static_data(output_dir: str) -> dict[str, Any]:
+	base = Path(output_dir)
+	base.mkdir(parents=True, exist_ok=True)
+
+	snapshots = query_snapshots(limit=5000)
+	changes = query_changes(limit=5000)
+	last_run = get_last_run()
+
+	status = {
+		"generated_at": datetime.now(timezone.utc).isoformat(),
+		"records": len(snapshots),
+		"changes": len(changes),
+		"last_run": last_run,
+	}
+
+	(base / "snapshots.json").write_text(json.dumps(snapshots, ensure_ascii=False, indent=2), encoding="utf-8")
+	(base / "changes.json").write_text(json.dumps(changes, ensure_ascii=False, indent=2), encoding="utf-8")
+	(base / "status.json").write_text(json.dumps(status, ensure_ascii=False, indent=2), encoding="utf-8")
+
+	return status
 
 
 def query_changes(limit: int = 500) -> list[dict[str, Any]]:
@@ -778,6 +816,7 @@ def main() -> int:
 	parser.add_argument("--host", default="127.0.0.1", help="Host del servidor web")
 	parser.add_argument("--port", type=int, default=8010, help="Puerto del servidor web")
 	parser.add_argument("--interval-minutes", type=int, default=30, help="Minutos entre actualizaciones en background")
+	parser.add_argument("--export-static", help="Exporta snapshots/changes/status JSON para web estática")
 	parser.add_argument("--skip-pdf", action="store_true", help="No descarga PDFs en local")
 	parser.add_argument("--telegram-token", help="Token del bot de Telegram")
 	parser.add_argument("--telegram-chat-id", help="Chat ID de Telegram")
@@ -839,6 +878,11 @@ def main() -> int:
 		print(json.dumps(data, ensure_ascii=False, indent=2))
 	else:
 		print(f"JSON guardado en: {args.out}")
+
+	if args.export_static:
+		status = export_static_data(args.export_static)
+		print(f"Export estático generado en: {args.export_static}")
+		print(json.dumps(status, ensure_ascii=False, indent=2))
 
 	return 0
 

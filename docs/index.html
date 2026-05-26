@@ -1,0 +1,172 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Histórico Realia (GitHub Pages)</title>
+  <style>
+    :root {
+      --bg: #f4f7fb;
+      --panel: #ffffff;
+      --ink: #0f172a;
+      --muted: #64748b;
+      --line: #e2e8f0;
+      --accent: #0f766e;
+      --warn-bg: #fff7ed;
+      --warn-fg: #9a3412;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+      color: var(--ink);
+      background: radial-gradient(circle at 10% 10%, #dff7f4 0, var(--bg) 40%), var(--bg);
+    }
+    .wrap {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 24px;
+    }
+    h1 { margin: 0 0 6px; }
+    .sub { color: var(--muted); margin-bottom: 16px; }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 12px;
+      box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
+    }
+    .label { color: var(--muted); font-size: 12px; }
+    .value { font-size: 20px; font-weight: 700; margin-top: 3px; }
+    .table-wrap {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      overflow: auto;
+    }
+    table { width: 100%; border-collapse: collapse; }
+    th, td {
+      padding: 10px;
+      border-bottom: 1px solid var(--line);
+      text-align: left;
+      font-size: 13px;
+      white-space: nowrap;
+    }
+    th {
+      background: #f8fafc;
+      position: sticky;
+      top: 0;
+      z-index: 1;
+    }
+    tr.changed { background: var(--warn-bg); }
+    .badge {
+      display: inline-block;
+      background: var(--warn-bg);
+      color: var(--warn-fg);
+      border: 1px solid #fed7aa;
+      border-radius: 999px;
+      padding: 2px 8px;
+      font-size: 11px;
+    }
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>Histórico de precios Realia</h1>
+    <div class="sub">Publicación automática con GitHub Actions cada 30 minutos.</div>
+
+    <div class="grid">
+      <div class="card"><div class="label">Registros</div><div class="value" id="total">-</div></div>
+      <div class="card"><div class="label">Cambios detectados</div><div class="value" id="changes">-</div></div>
+      <div class="card"><div class="label">Última ejecución</div><div class="value" id="last">-</div></div>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Fecha</th>
+            <th>Tipología</th>
+            <th>Precio</th>
+            <th>Precio anterior</th>
+            <th>Dormitorios</th>
+            <th>m²</th>
+            <th>Vivienda</th>
+            <th>Estado</th>
+            <th>PDF</th>
+          </tr>
+        </thead>
+        <tbody id="rows"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <script>
+    function fmtDate(value) {
+      if (!value) return '-';
+      const d = new Date(value);
+      if (Number.isNaN(d.getTime())) return value;
+      return d.toLocaleString('es-ES');
+    }
+
+    async function load() {
+      const [snapResp, statusResp] = await Promise.all([
+        fetch('./data/snapshots.json', { cache: 'no-store' }),
+        fetch('./data/status.json', { cache: 'no-store' }),
+      ]);
+
+      const snapshots = await snapResp.json();
+      const status = await statusResp.json();
+
+      const rows = document.getElementById('rows');
+      const total = document.getElementById('total');
+      const changes = document.getElementById('changes');
+      const last = document.getElementById('last');
+
+      rows.innerHTML = '';
+      let changedCount = 0;
+
+      for (const row of snapshots) {
+        if (row.price_changed) changedCount += 1;
+        const tr = document.createElement('tr');
+        if (row.price_changed) tr.className = 'changed';
+
+        const statusLabel = row.price_changed ? '<span class="badge">Cambio</span>' : '-';
+        const pdfLink = row.plan_pdf_url
+          ? `<a href="${row.plan_pdf_url}" target="_blank" rel="noopener noreferrer">Ver PDF</a>`
+          : '-';
+
+        tr.innerHTML = `
+          <td>${row.execution_date || '-'}</td>
+          <td>${row.typology || '-'}</td>
+          <td>${row.price_from || '-'}</td>
+          <td>${row.previous_price_from || '-'}</td>
+          <td>${row.bedrooms || '-'}</td>
+          <td>${row.square_meters || '-'}</td>
+          <td>${row.home || '-'}</td>
+          <td>${statusLabel}</td>
+          <td>${pdfLink}</td>
+        `;
+        rows.appendChild(tr);
+      }
+
+      total.textContent = String(snapshots.length);
+      changes.textContent = String(changedCount);
+      last.textContent = fmtDate(status?.last_run?.executed_at);
+    }
+
+    load().catch((err) => {
+      console.error(err);
+      alert('No se pudieron cargar los datos. Ejecuta primero el workflow.');
+    });
+  </script>
+</body>
+</html>
