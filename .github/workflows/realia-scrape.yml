@@ -32,7 +32,6 @@ jobs:
         run: |
           python scrapper.py \
             --insecure \
-            --skip-pdf \
             --out realia_data/last_run.json \
             --export-static docs/data
 

@@ -6,6 +6,7 @@ import json
 import logging
 import os
 import re
+import shutil
 import sqlite3
 from datetime import datetime, timezone
 from html import unescape
@@ -438,19 +439,47 @@ def get_last_run() -> dict[str, Any] | None:
 def export_static_data(output_dir: str) -> dict[str, Any]:
 	base = Path(output_dir)
 	base.mkdir(parents=True, exist_ok=True)
+	pdf_export_dir = base / "pdfs"
+	pdf_export_dir.mkdir(parents=True, exist_ok=True)
 
 	snapshots = query_snapshots(limit=5000)
+	exported_pdfs = 0
+	static_snapshots: list[dict[str, Any]] = []
+	for row in snapshots:
+		entry = dict(row)
+		local_pdf_path = entry.get("plan_pdf_local_path")
+		pdf_data_path = None
+
+		if local_pdf_path:
+			source = Path(local_pdf_path)
+			if source.exists():
+				try:
+					relative_pdf_path = source.relative_to(PDF_DIR)
+				except ValueError:
+					relative_pdf_path = Path(source.name)
+
+				target = pdf_export_dir / relative_pdf_path
+				target.parent.mkdir(parents=True, exist_ok=True)
+				shutil.copy2(source, target)
+				pdf_data_path = f"data/pdfs/{relative_pdf_path.as_posix()}"
+				exported_pdfs += 1
+
+		entry["plan_pdf_data_path"] = pdf_data_path
+		entry["has_pdf"] = bool(pdf_data_path)
+		static_snapshots.append(entry)
+
 	changes = query_changes(limit=5000)
 	last_run = get_last_run()
 
 	status = {
 		"generated_at": datetime.now(timezone.utc).isoformat(),
-		"records": len(snapshots),
+		"records": len(static_snapshots),
 		"changes": len(changes),
+		"exported_pdfs": exported_pdfs,
 		"last_run": last_run,
 	}
 
-	(base / "snapshots.json").write_text(json.dumps(snapshots, ensure_ascii=False, indent=2), encoding="utf-8")
+	(base / "snapshots.json").write_text(json.dumps(static_snapshots, ensure_ascii=False, indent=2), encoding="utf-8")
 	(base / "changes.json").write_text(json.dumps(changes, ensure_ascii=False, indent=2), encoding="utf-8")
 	(base / "status.json").write_text(json.dumps(status, ensure_ascii=False, indent=2), encoding="utf-8")
 

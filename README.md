@@ -56,7 +56,8 @@ Esto generará:
 1. `docs/data/snapshots.json`
 2. `docs/data/changes.json`
 3. `docs/data/status.json`
-4. `realia_data/last_run.json`
+4. `docs/data/pdfs/*` (copias locales para enlaces de descarga)
+5. `realia_data/last_run.json`
 
 ## Paso 5: validación
 
@@ -71,7 +72,7 @@ python -m venv .venv
 . .\.venv\Scripts\Activate.ps1
 pip install -r requirements.txt
 
-python .\scrapper.py --insecure --skip-pdf --out .\realia_data\last_run.json --export-static .\docs\data
+python .\scrapper.py --insecure --out .\realia_data\last_run.json --export-static .\docs\data
 ```
 
 ## Notas de seguridad

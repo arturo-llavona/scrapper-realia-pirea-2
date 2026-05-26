@@ -140,8 +140,8 @@
         if (row.price_changed) tr.className = 'changed';
 
         const statusLabel = row.price_changed ? '<span class="badge">Cambio</span>' : '-';
-        const pdfLink = row.plan_pdf_url
-          ? `<a href="${row.plan_pdf_url}" target="_blank" rel="noopener noreferrer">Ver PDF</a>`
+        const pdfLink = row.plan_pdf_data_path
+          ? `<a href="./${row.plan_pdf_data_path}" target="_blank" rel="noopener noreferrer">Descargar PDF</a>`
           : '-';
 
         tr.innerHTML = `
