@@ -1,0 +1,15 @@
+[Unit]
+Description=Realia scraper web
+After=network.target
+
+[Service]
+Type=simple
+User=ubuntu
+WorkingDirectory=/opt/realia
+EnvironmentFile=/opt/realia/.env
+ExecStart=/opt/realia/.venv/bin/python /opt/realia/scrapper.py --serve --insecure --interval-minutes 30 --host 0.0.0.0 --port 8010 --out /opt/realia/realia_data/last_run.json
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
