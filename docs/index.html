@@ -117,6 +117,23 @@
       return d.toLocaleString('es-ES');
     }
 
+    async function resolvePdfHref(row) {
+      if (row.plan_pdf_data_path) {
+        return `./${row.plan_pdf_data_path}`;
+      }
+      if (!row.execution_date || !row.typology) {
+        return null;
+      }
+
+      const candidate = `./data/pdfs/${encodeURIComponent(row.execution_date)}/${encodeURIComponent(row.typology)}.pdf`;
+      try {
+        const resp = await fetch(candidate, { method: 'HEAD', cache: 'no-store' });
+        return resp.ok ? candidate : null;
+      } catch {
+        return null;
+      }
+    }
+
     async function load() {
       const [snapResp, statusResp] = await Promise.all([
         fetch('./data/snapshots.json', { cache: 'no-store' }),
@@ -140,8 +157,9 @@
         if (row.price_changed) tr.className = 'changed';
 
         const statusLabel = row.price_changed ? '<span class="badge">Cambio</span>' : '-';
-        const pdfLink = row.plan_pdf_data_path
-          ? `<a href="./${row.plan_pdf_data_path}" target="_blank" rel="noopener noreferrer">Descargar PDF</a>`
+        const pdfHref = await resolvePdfHref(row);
+        const pdfLink = pdfHref
+          ? `<a href="${pdfHref}" target="_blank" rel="noopener noreferrer">Descargar PDF</a>`
           : '-';
 
         tr.innerHTML = `
