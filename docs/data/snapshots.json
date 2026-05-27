@@ -1,7 +1,7 @@
 [
   {
     "execution_date": "2026-05-27",
-    "executed_at": "2026-05-27T07:30:37.972649+00:00",
+    "executed_at": "2026-05-27T08:00:51.314771+00:00",
     "typology": "T01",
     "price_from": "732.100€",
     "previous_price_from": "732.100€",
@@ -19,7 +19,7 @@
   },
   {
     "execution_date": "2026-05-27",
-    "executed_at": "2026-05-27T07:30:37.972649+00:00",
+    "executed_at": "2026-05-27T08:00:51.314771+00:00",
     "typology": "T02",
     "price_from": "580.400€",
     "previous_price_from": "580.400€",
@@ -37,7 +37,7 @@
   },
   {
     "execution_date": "2026-05-27",
-    "executed_at": "2026-05-27T07:30:37.972649+00:00",
+    "executed_at": "2026-05-27T08:00:51.314771+00:00",
     "typology": "T05",
     "price_from": "435.500€",
     "previous_price_from": "435.500€",
