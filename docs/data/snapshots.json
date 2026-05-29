@@ -1,7 +1,7 @@
 [
   {
-    "execution_date": "2026-05-28",
-    "executed_at": "2026-05-28T22:00:50.769089+00:00",
+    "execution_date": "2026-05-29",
+    "executed_at": "2026-05-29T04:00:50.063337+00:00",
     "typology": "T01",
     "price_from": "732.100€",
     "previous_price_from": "732.100€",
@@ -12,14 +12,14 @@
     "garage_spots": "2",
     "storage_room": "1",
     "plan_pdf_url": "https://www.realia.es/storage/Promociones/Planos/99997/210911-a00vi00001jbool-a0cvi000005iz65-1779436799w3pbt.pdf",
-    "plan_pdf_local_path": "/home/runner/work/scrapper-realia-pirea-2/scrapper-realia-pirea-2/realia_data/pdfs/2026-05-28/T01.pdf",
+    "plan_pdf_local_path": "/home/runner/work/scrapper-realia-pirea-2/scrapper-realia-pirea-2/realia_data/pdfs/2026-05-29/T01.pdf",
     "has_pdf": true,
     "has_pdf_url": true,
-    "plan_pdf_data_path": "data/pdfs/2026-05-28/T01.pdf"
+    "plan_pdf_data_path": "data/pdfs/2026-05-29/T01.pdf"
   },
   {
-    "execution_date": "2026-05-28",
-    "executed_at": "2026-05-28T22:00:50.769089+00:00",
+    "execution_date": "2026-05-29",
+    "executed_at": "2026-05-29T04:00:50.063337+00:00",
     "typology": "T02",
     "price_from": "580.400€",
     "previous_price_from": "580.400€",
@@ -30,14 +30,14 @@
     "garage_spots": "2",
     "storage_room": "1",
     "plan_pdf_url": "https://www.realia.es/storage/Promociones/Planos/99997/210911-a00vi00001jbool-a0cvi000005iz9j-1779436799g4WPd.pdf",
-    "plan_pdf_local_path": "/home/runner/work/scrapper-realia-pirea-2/scrapper-realia-pirea-2/realia_data/pdfs/2026-05-28/T02.pdf",
+    "plan_pdf_local_path": "/home/runner/work/scrapper-realia-pirea-2/scrapper-realia-pirea-2/realia_data/pdfs/2026-05-29/T02.pdf",
     "has_pdf": true,
     "has_pdf_url": true,
-    "plan_pdf_data_path": "data/pdfs/2026-05-28/T02.pdf"
+    "plan_pdf_data_path": "data/pdfs/2026-05-29/T02.pdf"
   },
   {
-    "execution_date": "2026-05-28",
-    "executed_at": "2026-05-28T22:00:50.769089+00:00",
+    "execution_date": "2026-05-29",
+    "executed_at": "2026-05-29T04:00:50.063337+00:00",
     "typology": "T05",
     "price_from": "435.500€",
     "previous_price_from": "435.500€",
@@ -48,10 +48,10 @@
     "garage_spots": "1",
     "storage_room": "1",
     "plan_pdf_url": "https://www.realia.es/storage/Promociones/Planos/99997/210911-a00vi00001jbool-a0cvi000005ize9-1779436799SY8Bz.pdf",
-    "plan_pdf_local_path": "/home/runner/work/scrapper-realia-pirea-2/scrapper-realia-pirea-2/realia_data/pdfs/2026-05-28/T05.pdf",
+    "plan_pdf_local_path": "/home/runner/work/scrapper-realia-pirea-2/scrapper-realia-pirea-2/realia_data/pdfs/2026-05-29/T05.pdf",
     "has_pdf": true,
     "has_pdf_url": true,
-    "plan_pdf_data_path": "data/pdfs/2026-05-28/T05.pdf"
+    "plan_pdf_data_path": "data/pdfs/2026-05-29/T05.pdf"
   },
   {
     "execution_date": "2026-05-26",
