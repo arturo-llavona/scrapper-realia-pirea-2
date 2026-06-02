@@ -1,8 +1,8 @@
 {
   "url": "https://www.realia.es/promociones-obra-nueva/promociones-obra-nueva-madrid/pireo-ii",
-  "scraped_at": "2026-06-02T10:01:04.519393+00:00",
+  "scraped_at": "2026-06-02T16:00:53.534726+00:00",
   "section": "prices",
-  "units_count": 3,
+  "units_count": 4,
   "units": [
     {
       "typology": "T05",
@@ -23,6 +23,16 @@
       "garage_spots": "2",
       "storage_room": "1",
       "plan_pdf": "https://www.realia.es/storage/Promociones/Planos/99997/210911-a00vi00001jbool-a0cvi000005iz9j-1779436799g4WPd.pdf"
+    },
+    {
+      "typology": "T04",
+      "price_from": "600.900€",
+      "home": "Esc. 2 Pl. 2ª Pt. b",
+      "bedrooms": "3",
+      "square_meters": "154.85",
+      "garage_spots": "2",
+      "storage_room": "1",
+      "plan_pdf": "https://www.realia.es/storage/Promociones/Planos/99997/210911-a00vi00001jbool-a0cvi000005izcx-1779436799XUyw9.pdf"
     },
     {
       "typology": "T01",
@@ -64,13 +74,13 @@
     "Trastero",
     "1",
     "Descargar planos",
-    "T01",
+    "T04",
     "Desde"
   ],
   "history": {
     "execution_date": "2026-06-02",
-    "executed_at": "2026-06-02T10:01:04.519393+00:00",
-    "units_count": 3,
+    "executed_at": "2026-06-02T16:00:53.534726+00:00",
+    "units_count": 4,
     "changes_count": 0,
     "changes": []
   }
