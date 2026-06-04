@@ -1,19 +1,9 @@
 {
   "url": "https://www.realia.es/promociones-obra-nueva/promociones-obra-nueva-madrid/pireo-ii",
-  "scraped_at": "2026-06-03T10:47:14.186847+00:00",
+  "scraped_at": "2026-06-04T04:00:54.332767+00:00",
   "section": "prices",
-  "units_count": 4,
+  "units_count": 3,
   "units": [
-    {
-      "typology": "T05",
-      "price_from": "435.500€",
-      "home": "Esc. 3 Pl. 1ª Pt. a",
-      "bedrooms": "2",
-      "square_meters": "128.32",
-      "garage_spots": "1",
-      "storage_room": "1",
-      "plan_pdf": "https://www.realia.es/storage/Promociones/Planos/99997/210911-a00vi00001jbool-a0cvi000005ize9-1779436799SY8Bz.pdf"
-    },
     {
       "typology": "T02",
       "price_from": "580.400€",
@@ -46,20 +36,6 @@
     }
   ],
   "raw_lines_preview": [
-    "T05",
-    "Desde",
-    "435.500€",
-    "Viviendas",
-    "Esc. 3 Pl. 1ª Pt. a",
-    "Dormitorios",
-    "2",
-    "m²",
-    "128.32",
-    "Nº plazas garaje",
-    "1",
-    "Trastero",
-    "1",
-    "Descargar planos",
     "T02",
     "Desde",
     "580.400€",
@@ -75,12 +51,26 @@
     "1",
     "Descargar planos",
     "T04",
+    "Desde",
+    "600.900€",
+    "Viviendas",
+    "Esc. 2 Pl. 2ª Pt. b",
+    "Dormitorios",
+    "3",
+    "m²",
+    "154.85",
+    "Nº plazas garaje",
+    "2",
+    "Trastero",
+    "1",
+    "Descargar planos",
+    "T01",
     "Desde"
   ],
   "history": {
-    "execution_date": "2026-06-03",
-    "executed_at": "2026-06-03T10:47:14.186847+00:00",
-    "units_count": 4,
+    "execution_date": "2026-06-04",
+    "executed_at": "2026-06-04T04:00:54.332767+00:00",
+    "units_count": 3,
     "changes_count": 0,
     "changes": []
   }
