@@ -13,6 +13,7 @@ from html import unescape
 from pathlib import Path
 from typing import Any
 from urllib.parse import urlparse
+from zoneinfo import ZoneInfo
 
 import requests
 import urllib3
@@ -684,12 +685,29 @@ def send_telegram_message(token: str, chat_id: str, text: str, timeout: int = 20
 		"chat_id": chat_id,
 		"text": text,
 		"disable_web_page_preview": True,
+		"parse_mode": "HTML"
 	}
 	response = requests.post(endpoint, json=payload, timeout=timeout)
 	response.raise_for_status()
 	result = response.json()
 	if not result.get("ok"):
 		raise RuntimeError(f"Telegram API error: {result}")
+
+
+def format_execution_time(executed_at: str | None, tz_name: str = "Europe/Madrid") -> str:
+	if not executed_at:
+		return "-"
+	try:
+		dt = datetime.fromisoformat(str(executed_at).replace("Z", "+00:00"))
+	except ValueError:
+		return str(executed_at)
+
+	try:
+		localized = dt.astimezone(ZoneInfo(tz_name))
+	except Exception:
+		localized = dt
+
+	return localized.strftime("%H:%M:%S")
 
 
 def build_telegram_message(
@@ -702,6 +720,7 @@ def build_telegram_message(
 	changes_count = history.get("changes_count", 0)
 	execution_date = history.get("execution_date", "-")
 	executed_at = history.get("executed_at", "-")
+	hour_text = format_execution_time(executed_at)
 	units_count = history.get("units_count", 0)
 	units = units or []
 
@@ -710,16 +729,16 @@ def build_telegram_message(
 		return None
 
 	lines = [
-		"Realia scraper: snapshot de precios",
-		f"Fecha: {execution_date}",
-		f"Hora ejecución: {executed_at}",
-		f"Viviendas leídas: {units_count}",
-		f"Cambios detectados: {changes_count}",
+		"Resumen de información de la Web de Realia para la promoción <b>Pireo II</b><br>",
+		f"<b>Fecha:</b> {execution_date}",
+		f"<b>Hora ejecución (Madrid):</b> {hour_text}",
+		f"<b>Viviendas leídas:</b> {units_count}",
+		f"<b>Cambios detectados:</b> {changes_count}",
 	]
 
 	if units:
 		lines.append("")
-		lines.append("Detalle leído:")
+		lines.append("<b>Detalle leído:</b>")
 		for unit in units:
 			typology = unit.get("typology") or "-"
 			home = unit.get("home") or "-"
@@ -730,7 +749,7 @@ def build_telegram_message(
 
 	if changes:
 		lines.append("")
-		lines.append("Cambios vs ejecución anterior:")
+		lines.append("<b>Cambios vs ejecución anterior:</b>")
 		for item in changes:
 			typology = item.get("typology", "-")
 			home = item.get("home") or "-"
