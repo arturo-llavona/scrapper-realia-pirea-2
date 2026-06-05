@@ -665,6 +665,7 @@ def run_scrape_cycle(
 		telegram_chat_id=telegram_chat_id,
 		url=url,
 		history=persistence_result,
+		units=data.get("units", []),
 		notify_no_changes=telegram_notify_no_changes,
 	)
 
@@ -691,32 +692,60 @@ def send_telegram_message(token: str, chat_id: str, text: str, timeout: int = 20
 		raise RuntimeError(f"Telegram API error: {result}")
 
 
-def build_telegram_message(url: str, history: dict[str, Any], notify_no_changes: bool) -> str | None:
+def build_telegram_message(
+	url: str,
+	history: dict[str, Any],
+	units: list[dict[str, Any]] | None,
+	notify_no_changes: bool,
+) -> str | None:
 	changes = history.get("changes", [])
 	changes_count = history.get("changes_count", 0)
 	execution_date = history.get("execution_date", "-")
+	executed_at = history.get("executed_at", "-")
+	units_count = history.get("units_count", 0)
+	units = units or []
 
-	if changes_count == 0 and not notify_no_changes:
+	# Compatibilidad hacia atrás por si se desea desactivar el mensaje sin cambios.
+	if changes_count == 0 and not notify_no_changes and not units:
 		return None
 
-	if changes_count == 0:
-		return (
-			"Realia scraper: sin cambios de precio\n"
-			f"Fecha: {execution_date}\n"
-			f"URL: {url}"
-		)
-
 	lines = [
-		f"Realia scraper: {changes_count} cambio(s) detectado(s)",
+		"Realia scraper: snapshot de precios",
 		f"Fecha: {execution_date}",
+		f"Hora ejecución: {executed_at}",
+		f"Viviendas leídas: {units_count}",
+		f"Cambios detectados: {changes_count}",
 	]
-	for item in changes:
-		typology = item.get("typology", "-")
-		previous_price = item.get("previous_price_from") or "-"
-		price = item.get("price_from") or "-"
-		lines.append(f"- {typology}: {previous_price} -> {price}")
+
+	if units:
+		lines.append("")
+		lines.append("Detalle leído:")
+		for unit in units:
+			typology = unit.get("typology") or "-"
+			home = unit.get("home") or "-"
+			price = unit.get("price_from") or "-"
+			bedrooms = unit.get("bedrooms") or "-"
+			square_meters = unit.get("square_meters") or "-"
+			lines.append(f"- {typology} | {home} | {price} | {bedrooms} hab | {square_meters} m2")
+
+	if changes:
+		lines.append("")
+		lines.append("Cambios vs ejecución anterior:")
+		for item in changes:
+			typology = item.get("typology", "-")
+			home = item.get("home") or "-"
+			previous_price = item.get("previous_price_from") or "-"
+			price = item.get("price_from") or "-"
+			lines.append(f"- {typology} | {home}: {previous_price} -> {price}")
+
+	lines.append("")
 	lines.append(f"URL: {url}")
-	return "\n".join(lines)
+
+	message = "\n".join(lines)
+	max_chars = 3900
+	if len(message) > max_chars:
+		message = message[: max_chars - 35] + "\n...\n(Mensaje recortado por longitud)"
+	return message
 
 
 def notify_telegram(
@@ -724,6 +753,7 @@ def notify_telegram(
 	telegram_chat_id: str | None,
 	url: str,
 	history: dict[str, Any],
+	units: list[dict[str, Any]] | None,
 	notify_no_changes: bool,
 ) -> None:
 	if not telegram_token or not telegram_chat_id:
@@ -732,6 +762,7 @@ def notify_telegram(
 	message = build_telegram_message(
 		url=url,
 		history=history,
+		units=units,
 		notify_no_changes=notify_no_changes,
 	)
 	if not message:

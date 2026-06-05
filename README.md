@@ -7,7 +7,7 @@ Despliegue sin tarjeta usando GitHub Actions + GitHub Pages.
 1. Ejecuta el scraping cada 30 minutos con GitHub Actions.
 2. Guarda histórico y detecta cambios de precio.
 3. Publica la web estática en GitHub Pages.
-4. Envía notificación Telegram cuando hay cambios.
+4. Envía notificación Telegram en cada ejecución con el snapshot leído.
 
 ## Estructura importante
 
