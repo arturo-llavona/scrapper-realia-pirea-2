@@ -45,8 +45,9 @@ def init_db() -> None:
 	with get_db() as conn:
 		conn.execute(
 			"""
-			CREATE TABLE IF NOT EXISTS runs (
-				execution_date TEXT PRIMARY KEY,
+			CREATE TABLE IF NOT EXISTS runs_history (
+				execution_id TEXT PRIMARY KEY,
+				execution_date TEXT NOT NULL,
 				executed_at TEXT NOT NULL,
 				url TEXT NOT NULL,
 				units_count INTEGER NOT NULL
@@ -55,13 +56,14 @@ def init_db() -> None:
 		)
 		conn.execute(
 			"""
-			CREATE TABLE IF NOT EXISTS snapshots (
+			CREATE TABLE IF NOT EXISTS snapshots_history (
+				execution_id TEXT NOT NULL,
 				execution_date TEXT NOT NULL,
 				executed_at TEXT NOT NULL,
 				typology TEXT NOT NULL,
 				price_from TEXT,
 				price_value REAL,
-				home TEXT,
+				home TEXT NOT NULL DEFAULT '',
 				bedrooms TEXT,
 				square_meters TEXT,
 				garage_spots TEXT,
@@ -70,11 +72,77 @@ def init_db() -> None:
 				plan_pdf_local_path TEXT,
 				previous_price_from TEXT,
 				price_changed INTEGER NOT NULL DEFAULT 0,
-				PRIMARY KEY (execution_date, typology)
+				PRIMARY KEY (execution_id, typology, home)
 			)
 			"""
 		)
 
+		# Migración desde tablas antiguas si existen.
+		table_names = {
+			row[0] for row in conn.execute("SELECT name FROM sqlite_master WHERE type='table'").fetchall()
+		}
+
+		if "runs" in table_names:
+			run_cols = {row[1] for row in conn.execute("PRAGMA table_info(runs)").fetchall()}
+			exec_id_expr = "COALESCE(execution_id, executed_at)" if "execution_id" in run_cols else "executed_at"
+			conn.execute(
+				f"""
+				INSERT OR IGNORE INTO runs_history(execution_id, execution_date, executed_at, url, units_count)
+				SELECT {exec_id_expr}, execution_date, executed_at, url, units_count
+				FROM runs
+				"""
+			)
+
+		if "snapshots" in table_names:
+			snapshot_cols = {row[1] for row in conn.execute("PRAGMA table_info(snapshots)").fetchall()}
+			exec_id_expr = "COALESCE(execution_id, executed_at)" if "execution_id" in snapshot_cols else "executed_at"
+			home_expr = "COALESCE(home, '')" if "home" in snapshot_cols else "''"
+			price_value_expr = "price_value" if "price_value" in snapshot_cols else "NULL"
+			prev_price_expr = "previous_price_from" if "previous_price_from" in snapshot_cols else "NULL"
+			price_changed_expr = "price_changed" if "price_changed" in snapshot_cols else "0"
+			garage_expr = "garage_spots" if "garage_spots" in snapshot_cols else "NULL"
+			storage_expr = "storage_room" if "storage_room" in snapshot_cols else "NULL"
+			pdf_local_expr = "plan_pdf_local_path" if "plan_pdf_local_path" in snapshot_cols else "NULL"
+
+			conn.execute(
+				f"""
+				INSERT OR IGNORE INTO snapshots_history(
+					execution_id,
+					execution_date,
+					executed_at,
+					typology,
+					price_from,
+					price_value,
+					home,
+					bedrooms,
+					square_meters,
+					garage_spots,
+					storage_room,
+					plan_pdf_url,
+					plan_pdf_local_path,
+					previous_price_from,
+					price_changed
+				)
+				SELECT
+					{exec_id_expr},
+					execution_date,
+					executed_at,
+					typology,
+					price_from,
+					{price_value_expr},
+					{home_expr},
+					bedrooms,
+					square_meters,
+					{garage_expr},
+					{storage_expr},
+					plan_pdf_url,
+					{pdf_local_expr},
+					{prev_price_expr},
+					{price_changed_expr}
+				FROM snapshots
+				WHERE typology IS NOT NULL
+				"""
+			)
 
 def parse_price_value(price_from: str | None) -> float | None:
 	if not price_from:
@@ -90,18 +158,30 @@ def parse_price_value(price_from: str | None) -> float | None:
 		return None
 
 
-def get_previous_price(conn: sqlite3.Connection, execution_date: str, typology: str) -> str | None:
+def get_previous_price(
+	conn: sqlite3.Connection,
+	executed_at: str,
+	typology: str,
+	home: str,
+) -> str | None:
 	row = conn.execute(
 		"""
 		SELECT price_from
-		FROM snapshots
-		WHERE typology = ? AND execution_date < ?
-		ORDER BY execution_date DESC
+		FROM snapshots_history
+		WHERE typology = ?
+		  AND home = ?
+		  AND executed_at < ?
+		ORDER BY executed_at DESC
 		LIMIT 1
 		""",
-		(typology, execution_date),
+		(typology, home, executed_at),
 	).fetchone()
 	return row["price_from"] if row else None
+
+
+def build_execution_id(executed_at: str) -> str:
+	"""Genera un id estable por ejecución evitando caracteres problemáticos en rutas."""
+	return re.sub(r"[^0-9T]", "", executed_at.replace("+", ""))
 
 
 def safe_file_name(value: str) -> str:
@@ -110,20 +190,21 @@ def safe_file_name(value: str) -> str:
 
 def download_pdf(
 	pdf_url: str,
-	execution_date: str,
+	execution_id: str,
 	typology: str,
+	home: str,
 	verify: bool | str,
 	timeout: int = 60,
 ) -> str | None:
 	if not pdf_url:
 		return None
 
-	typology_dir = PDF_DIR / execution_date
+	typology_dir = PDF_DIR / execution_id
 	typology_dir.mkdir(parents=True, exist_ok=True)
 
 	url_path = Path(urlparse(pdf_url).path)
 	extension = url_path.suffix if url_path.suffix else ".pdf"
-	file_name = f"{safe_file_name(typology)}{extension}"
+	file_name = f"{safe_file_name(typology)}_{safe_file_name(home or 'home')}{extension}"
 	target_path = typology_dir / file_name
 
 	headers = {
@@ -277,29 +358,32 @@ def persist_snapshot(
 	init_db()
 	executed_at = data["scraped_at"]
 	execution_date = executed_at.split("T", maxsplit=1)[0]
+	execution_id = build_execution_id(executed_at)
 	units = data.get("units", [])
 	changes: list[dict[str, Any]] = []
 
 	with get_db() as conn:
 		conn.execute(
 			"""
-			INSERT INTO runs(execution_date, executed_at, url, units_count)
-			VALUES(?, ?, ?, ?)
-			ON CONFLICT(execution_date)
+			INSERT INTO runs_history(execution_id, execution_date, executed_at, url, units_count)
+			VALUES(?, ?, ?, ?, ?)
+			ON CONFLICT(execution_id)
 			DO UPDATE SET
 				executed_at = excluded.executed_at,
+				execution_date = excluded.execution_date,
 				url = excluded.url,
 				units_count = excluded.units_count
 			""",
-			(execution_date, executed_at, data["url"], len(units)),
+			(execution_id, execution_date, executed_at, data["url"], len(units)),
 		)
 
 		for unit in units:
 			typology = unit.get("typology")
+			home = (unit.get("home") or "").strip()
 			if not typology:
 				continue
 
-			previous_price = get_previous_price(conn, execution_date, typology)
+			previous_price = get_previous_price(conn, executed_at, typology, home)
 			current_price = unit.get("price_from")
 			price_changed = int(previous_price is not None and previous_price != current_price)
 
@@ -308,8 +392,9 @@ def persist_snapshot(
 				try:
 					local_pdf = download_pdf(
 						pdf_url=unit["plan_pdf"],
-						execution_date=execution_date,
+						execution_id=execution_id,
 						typology=typology,
+						home=home,
 						verify=verify,
 					)
 				except Exception:
@@ -317,7 +402,8 @@ def persist_snapshot(
 
 			conn.execute(
 				"""
-				INSERT INTO snapshots(
+				INSERT INTO snapshots_history(
+					execution_id,
 					execution_date,
 					executed_at,
 					typology,
@@ -333,9 +419,10 @@ def persist_snapshot(
 					previous_price_from,
 					price_changed
 				)
-				VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-				ON CONFLICT(execution_date, typology)
+				VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+				ON CONFLICT(execution_id, typology, home)
 				DO UPDATE SET
+					execution_date = excluded.execution_date,
 					executed_at = excluded.executed_at,
 					price_from = excluded.price_from,
 					price_value = excluded.price_value,
@@ -350,12 +437,13 @@ def persist_snapshot(
 					price_changed = excluded.price_changed
 				""",
 				(
+					execution_id,
 					execution_date,
 					executed_at,
 					typology,
 					current_price,
 					parse_price_value(current_price),
-					unit.get("home"),
+					home,
 					unit.get("bedrooms"),
 					unit.get("square_meters"),
 					unit.get("garage_spots"),
@@ -370,14 +458,18 @@ def persist_snapshot(
 			if price_changed:
 				changes.append(
 					{
+						"execution_id": execution_id,
 						"execution_date": execution_date,
+						"executed_at": executed_at,
 						"typology": typology,
+						"home": home,
 						"previous_price_from": previous_price,
 						"price_from": current_price,
 					}
 				)
 
 	return {
+		"execution_id": execution_id,
 		"execution_date": execution_date,
 		"executed_at": executed_at,
 		"units_count": len(units),
@@ -392,10 +484,12 @@ def query_snapshots(limit: int = 500) -> list[dict[str, Any]]:
 		rows = conn.execute(
 			"""
 			SELECT
+				execution_id,
 				execution_date,
 				executed_at,
 				typology,
 				price_from,
+				price_value,
 				previous_price_from,
 				price_changed,
 				home,
@@ -405,8 +499,8 @@ def query_snapshots(limit: int = 500) -> list[dict[str, Any]]:
 				storage_room,
 				plan_pdf_url,
 				plan_pdf_local_path
-			FROM snapshots
-			ORDER BY execution_date DESC, typology ASC
+			FROM snapshots_history
+			ORDER BY executed_at DESC, typology ASC, home ASC
 			LIMIT ?
 			""",
 			(limit,),
@@ -427,8 +521,8 @@ def get_last_run() -> dict[str, Any] | None:
 	with get_db() as conn:
 		row = conn.execute(
 			"""
-			SELECT execution_date, executed_at, url, units_count
-			FROM runs
+			SELECT execution_id, execution_date, executed_at, url, units_count
+			FROM runs_history
 			ORDER BY executed_at DESC
 			LIMIT 1
 			"""
@@ -492,13 +586,16 @@ def query_changes(limit: int = 500) -> list[dict[str, Any]]:
 		rows = conn.execute(
 			"""
 			SELECT
+				execution_id,
 				execution_date,
+				executed_at,
 				typology,
+				home,
 				previous_price_from,
 				price_from
-			FROM snapshots
+			FROM snapshots_history
 			WHERE price_changed = 1
-			ORDER BY execution_date DESC, typology ASC
+			ORDER BY executed_at DESC, typology ASC, home ASC
 			LIMIT ?
 			""",
 			(limit,),
@@ -506,17 +603,17 @@ def query_changes(limit: int = 500) -> list[dict[str, Any]]:
 	return [dict(row) for row in rows]
 
 
-def get_snapshot(execution_date: str, typology: str) -> dict[str, Any] | None:
+def get_snapshot(execution_id: str, typology: str, home: str = "") -> dict[str, Any] | None:
 	init_db()
 	with get_db() as conn:
 		row = conn.execute(
 			"""
 			SELECT *
-			FROM snapshots
-			WHERE execution_date = ? AND typology = ?
+			FROM snapshots_history
+			WHERE execution_id = ? AND typology = ? AND home = ?
 			LIMIT 1
 			""",
-			(execution_date, typology),
+			(execution_id, typology, home),
 		).fetchone()
 	return dict(row) if row else None
 
@@ -768,8 +865,8 @@ def build_web_app(
         const tr = document.createElement('tr');
         if (row.price_changed) tr.className = 'changed';
 				const pdf = row.has_pdf
-					? `<a href="/api/pdf/${encodeURIComponent(row.execution_date)}/${encodeURIComponent(row.typology)}" target="_blank">Ver PDF</a>`
-          : '-';
+					? `<a href="/api/pdf/${encodeURIComponent(row.execution_id)}/${encodeURIComponent(row.typology)}?home=${encodeURIComponent(row.home || '')}" target="_blank">Ver PDF</a>`
+					: '-';
         const status = row.price_changed
           ? '<span class="badge changed">Cambio</span>'
           : '-';
@@ -817,9 +914,9 @@ def build_web_app(
 	def api_status() -> JSONResponse:
 		return JSONResponse(state)
 
-	@app.get("/api/pdf/{execution_date}/{typology}")
-	def api_pdf(execution_date: str, typology: str):
-		row = get_snapshot(execution_date=execution_date, typology=typology)
+	@app.get("/api/pdf/{execution_id}/{typology}")
+	def api_pdf(execution_id: str, typology: str, home: str = ""):
+		row = get_snapshot(execution_id=execution_id, typology=typology, home=home)
 		if not row:
 			raise HTTPException(status_code=404, detail="Registro no encontrado")
 		pdf_path = row.get("plan_pdf_local_path")

@@ -4,51 +4,132 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Histórico Realia - Pirea II</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
   <style>
     :root {
-      --bg: #f4f7fb;
-      --panel: #ffffff;
-      --ink: #0f172a;
-      --muted: #64748b;
-      --line: #e2e8f0;
-      --accent: #0f766e;
-      --warn-bg: #fff7ed;
+      --bg: #f3efe7;
+      --bg-2: #efe4d2;
+      --panel: #fffdf9;
+      --ink: #2f1f18;
+      --muted: #785f4b;
+      --line: #e5d7c3;
+      --accent: #b33a3a;
+      --accent-2: #1f6c5d;
+      --warn-bg: #fff1dc;
       --warn-fg: #9a3412;
     }
     * { box-sizing: border-box; }
     body {
       margin: 0;
-      font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+      font-family: "IBM Plex Sans", "Segoe UI", sans-serif;
       color: var(--ink);
-      background: radial-gradient(circle at 10% 10%, #dff7f4 0, var(--bg) 40%), var(--bg);
+      background:
+        radial-gradient(circle at 85% 8%, #f8d8b0 0, transparent 30%),
+        radial-gradient(circle at 12% 20%, #e6f1d8 0, transparent 24%),
+        linear-gradient(145deg, var(--bg), var(--bg-2));
+      min-height: 100vh;
     }
     .wrap {
-      max-width: 1100px;
+      max-width: 1280px;
       margin: 0 auto;
-      padding: 24px;
+      padding: 28px 18px 36px;
     }
-    h1 { margin: 0 0 6px; }
-    .sub { color: var(--muted); margin-bottom: 16px; }
+    h1 {
+      margin: 0;
+      font-family: "Space Grotesk", "Arial Black", sans-serif;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+    .sub {
+      color: var(--muted);
+      margin: 6px 0 20px;
+      max-width: 760px;
+    }
     .grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 12px;
-      margin-bottom: 16px;
+      gap: 14px;
+      margin-bottom: 18px;
     }
     .card {
       background: var(--panel);
       border: 1px solid var(--line);
-      border-radius: 12px;
-      padding: 12px;
-      box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
+      border-radius: 14px;
+      padding: 14px;
+      box-shadow: 0 6px 20px rgba(77, 53, 42, 0.08);
     }
     .label { color: var(--muted); font-size: 12px; }
-    .value { font-size: 20px; font-weight: 700; margin-top: 3px; }
+    .value { font-size: 22px; font-weight: 700; margin-top: 3px; }
+
+    .section-title {
+      margin: 24px 0 8px;
+      font-family: "Space Grotesk", sans-serif;
+      font-weight: 600;
+      font-size: 18px;
+    }
+
+    .charts {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 14px;
+      margin-bottom: 14px;
+    }
+
+    .chart-card {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 14px;
+      box-shadow: 0 6px 20px rgba(77, 53, 42, 0.08);
+    }
+
+    .chart-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    .chart-title {
+      font-size: 14px;
+      color: var(--muted);
+      font-weight: 600;
+    }
+
+    .filters {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    select {
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 6px 10px;
+      background: #fff;
+      color: var(--ink);
+      font: inherit;
+    }
+
+    .canvas-wrap {
+      width: 100%;
+      min-height: 340px;
+    }
+
+    .canvas-wrap canvas {
+      width: 100%;
+      height: 340px;
+    }
+
     .table-wrap {
       background: var(--panel);
       border: 1px solid var(--line);
-      border-radius: 12px;
+      border-radius: 14px;
       overflow: auto;
+      box-shadow: 0 6px 20px rgba(77, 53, 42, 0.08);
     }
     table { width: 100%; border-collapse: collapse; }
     th, td {
@@ -59,7 +140,7 @@
       white-space: nowrap;
     }
     th {
-      background: #f8fafc;
+      background: #f8f2e8;
       position: sticky;
       top: 0;
       z-index: 1;
@@ -76,30 +157,70 @@
     }
     a { color: var(--accent); text-decoration: none; }
     a:hover { text-decoration: underline; }
+
+    @media (min-width: 980px) {
+      .charts {
+        grid-template-columns: 1.4fr 1.1fr;
+      }
+      .chart-card.full {
+        grid-column: 1 / -1;
+      }
+    }
   </style>
 </head>
 <body>
   <div class="wrap">
     <h1>Histórico de precios Realia</h1>
-    <div class="sub">Publicación automática con GitHub Actions cada 30 minutos.</div>
+    <div class="sub">Snapshot automático por cada ejecución del scraper. Puedes comparar la evolución por tipología y luego el detalle por vivienda dentro de cada tipología.</div>
 
     <div class="grid">
       <div class="card"><div class="label">Registros</div><div class="value" id="total">-</div></div>
+      <div class="card"><div class="label">Ejecuciones</div><div class="value" id="runs">-</div></div>
       <div class="card"><div class="label">Cambios detectados</div><div class="value" id="changes">-</div></div>
       <div class="card"><div class="label">Última ejecución</div><div class="value" id="last">-</div></div>
     </div>
+
+    <div class="section-title">Gráficas</div>
+    <div class="charts">
+      <div class="chart-card full">
+        <div class="chart-head">
+          <div class="chart-title">Evolución de precio medio por tipología</div>
+        </div>
+        <div class="canvas-wrap"><canvas id="typologyTrendChart"></canvas></div>
+      </div>
+
+      <div class="chart-card">
+        <div class="chart-head">
+          <div class="chart-title">Detalle por vivienda</div>
+          <div class="filters">
+            <label for="typologySelect">Tipología</label>
+            <select id="typologySelect"></select>
+          </div>
+        </div>
+        <div class="canvas-wrap"><canvas id="homeTrendChart"></canvas></div>
+      </div>
+
+      <div class="chart-card">
+        <div class="chart-head">
+          <div class="chart-title">Última ejecución: precio por tipología</div>
+        </div>
+        <div class="canvas-wrap"><canvas id="lastRunBarChart"></canvas></div>
+      </div>
+    </div>
+
+    <div class="section-title">Detalle de snapshots</div>
 
     <div class="table-wrap">
       <table>
         <thead>
           <tr>
-            <th>Fecha</th>
+            <th>Ejecución</th>
             <th>Tipología</th>
+            <th>Vivienda</th>
             <th>Precio</th>
             <th>Precio anterior</th>
             <th>Dormitorios</th>
             <th>m²</th>
-            <th>Vivienda</th>
             <th>Estado</th>
             <th>PDF</th>
           </tr>
@@ -110,11 +231,227 @@
   </div>
 
   <script>
+    const palette = [
+      '#b33a3a', '#1f6c5d', '#2b59c3', '#9b3db3', '#d97706', '#0f766e', '#7c3aed', '#c2410c'
+    ];
+
+    let typologyTrendChart = null;
+    let homeTrendChart = null;
+    let lastRunBarChart = null;
+
     function fmtDate(value) {
       if (!value) return '-';
       const d = new Date(value);
       if (Number.isNaN(d.getTime())) return value;
       return d.toLocaleString('es-ES');
+    }
+
+    function priceNumber(row) {
+      if (typeof row.price_value === 'number') return row.price_value;
+      const raw = String(row.price_from || '').replace(/[^\d,\.]/g, '').replace(/\./g, '').replace(',', '.');
+      const value = Number(raw);
+      return Number.isFinite(value) ? value : null;
+    }
+
+    function euro(value) {
+      if (value == null || !Number.isFinite(value)) return '-';
+      return value.toLocaleString('es-ES', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 });
+    }
+
+    function groupByExecution(snapshots) {
+      const byExecution = new Map();
+      for (const row of snapshots) {
+        const key = row.execution_id || row.executed_at || row.execution_date;
+        if (!byExecution.has(key)) {
+          byExecution.set(key, {
+            executed_at: row.executed_at || row.execution_date,
+            rows: [],
+          });
+        }
+        byExecution.get(key).rows.push(row);
+      }
+      return Array.from(byExecution.values()).sort((a, b) => new Date(a.executed_at) - new Date(b.executed_at));
+    }
+
+    function buildTypologySeries(executions) {
+      const labels = executions.map((e) => fmtDate(e.executed_at));
+      const typologies = Array.from(new Set(executions.flatMap((e) => e.rows.map((r) => r.typology).filter(Boolean)))).sort();
+      const datasets = typologies.map((typology, idx) => {
+        const values = executions.map((exec) => {
+          const rows = exec.rows.filter((r) => r.typology === typology);
+          const prices = rows.map(priceNumber).filter((v) => v != null);
+          if (!prices.length) return null;
+          const avg = prices.reduce((sum, n) => sum + n, 0) / prices.length;
+          return Math.round(avg);
+        });
+        return {
+          label: typology,
+          data: values,
+          borderColor: palette[idx % palette.length],
+          backgroundColor: palette[idx % palette.length],
+          tension: 0.2,
+          spanGaps: true,
+        };
+      });
+
+      return { labels, typologies, datasets };
+    }
+
+    function buildHomeSeries(executions, selectedTypology) {
+      const labels = executions.map((e) => fmtDate(e.executed_at));
+      const homes = Array.from(
+        new Set(
+          executions
+            .flatMap((e) => e.rows.filter((r) => r.typology === selectedTypology).map((r) => r.home || 'Sin vivienda'))
+        )
+      ).sort();
+
+      const datasets = homes.map((home, idx) => {
+        const values = executions.map((exec) => {
+          const row = exec.rows.find((r) => r.typology === selectedTypology && (r.home || 'Sin vivienda') === home);
+          return row ? priceNumber(row) : null;
+        });
+
+        return {
+          label: home,
+          data: values,
+          borderColor: palette[idx % palette.length],
+          backgroundColor: palette[idx % palette.length],
+          tension: 0.2,
+          spanGaps: true,
+        };
+      });
+
+      return { labels, datasets };
+    }
+
+    function buildLastRunSeries(executions) {
+      const last = executions[executions.length - 1];
+      if (!last) return { labels: [], values: [] };
+
+      const byTypology = new Map();
+      for (const row of last.rows) {
+        const p = priceNumber(row);
+        if (p == null) continue;
+        const key = row.typology || '-';
+        const list = byTypology.get(key) || [];
+        list.push(p);
+        byTypology.set(key, list);
+      }
+
+      const labels = Array.from(byTypology.keys()).sort();
+      const values = labels.map((label) => {
+        const list = byTypology.get(label) || [];
+        if (!list.length) return 0;
+        return Math.round(list.reduce((sum, n) => sum + n, 0) / list.length);
+      });
+
+      return { labels, values };
+    }
+
+    function chartMoneyTick(value) {
+      return euro(value).replace('€', ' €');
+    }
+
+    function makeLineChart(ctx, labels, datasets) {
+      return new Chart(ctx, {
+        type: 'line',
+        data: { labels, datasets },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          interaction: { mode: 'nearest', intersect: false },
+          plugins: {
+            tooltip: {
+              callbacks: {
+                label(context) {
+                  return `${context.dataset.label}: ${euro(context.parsed.y)}`;
+                },
+              },
+            },
+          },
+          scales: {
+            y: {
+              ticks: {
+                callback: chartMoneyTick,
+              },
+            },
+          },
+        },
+      });
+    }
+
+    function renderCharts(snapshots) {
+      const executions = groupByExecution(snapshots);
+      const typologySeries = buildTypologySeries(executions);
+
+      if (typologyTrendChart) typologyTrendChart.destroy();
+      typologyTrendChart = makeLineChart(
+        document.getElementById('typologyTrendChart'),
+        typologySeries.labels,
+        typologySeries.datasets
+      );
+
+      const select = document.getElementById('typologySelect');
+      select.innerHTML = '';
+      for (const typology of typologySeries.typologies) {
+        const opt = document.createElement('option');
+        opt.value = typology;
+        opt.textContent = typology;
+        select.appendChild(opt);
+      }
+
+      function drawHomeChart() {
+        const chosen = select.value;
+        const homeSeries = buildHomeSeries(executions, chosen);
+        if (homeTrendChart) homeTrendChart.destroy();
+        homeTrendChart = makeLineChart(
+          document.getElementById('homeTrendChart'),
+          homeSeries.labels,
+          homeSeries.datasets
+        );
+      }
+
+      if (typologySeries.typologies.length) {
+        drawHomeChart();
+        select.addEventListener('change', drawHomeChart);
+      }
+
+      const lastRunSeries = buildLastRunSeries(executions);
+      if (lastRunBarChart) lastRunBarChart.destroy();
+      lastRunBarChart = new Chart(document.getElementById('lastRunBarChart'), {
+        type: 'bar',
+        data: {
+          labels: lastRunSeries.labels,
+          datasets: [
+            {
+              label: 'Precio medio',
+              data: lastRunSeries.values,
+              backgroundColor: lastRunSeries.labels.map((_, i) => palette[i % palette.length]),
+            },
+          ],
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            tooltip: {
+              callbacks: {
+                label(context) {
+                  return ` ${euro(context.parsed.y)}`;
+                },
+              },
+            },
+          },
+          scales: {
+            y: {
+              ticks: {
+                callback: chartMoneyTick,
+              },
+            },
+          },
+        },
+      });
     }
 
     async function load() {
@@ -128,13 +465,18 @@
 
       const rows = document.getElementById('rows');
       const total = document.getElementById('total');
+      const runs = document.getElementById('runs');
       const changes = document.getElementById('changes');
       const last = document.getElementById('last');
 
       rows.innerHTML = '';
       let changedCount = 0;
+      const executionIds = new Set();
+
+      snapshots.sort((a, b) => new Date(b.executed_at) - new Date(a.executed_at));
 
       for (const row of snapshots) {
+        executionIds.add(row.execution_id || row.executed_at || row.execution_date || '-');
         if (row.price_changed) changedCount += 1;
         const tr = document.createElement('tr');
         if (row.price_changed) tr.className = 'changed';
@@ -145,13 +487,13 @@
           : '-';
 
         tr.innerHTML = `
-          <td>${row.execution_date || '-'}</td>
+          <td>${fmtDate(row.executed_at || row.execution_date)}</td>
           <td>${row.typology || '-'}</td>
+          <td>${row.home || '-'}</td>
           <td>${row.price_from || '-'}</td>
           <td>${row.previous_price_from || '-'}</td>
           <td>${row.bedrooms || '-'}</td>
           <td>${row.square_meters || '-'}</td>
-          <td>${row.home || '-'}</td>
           <td>${statusLabel}</td>
           <td>${pdfLink}</td>
         `;
@@ -159,8 +501,11 @@
       }
 
       total.textContent = String(snapshots.length);
+      runs.textContent = String(executionIds.size);
       changes.textContent = String(changedCount);
       last.textContent = fmtDate(status?.last_run?.executed_at);
+
+      renderCharts(snapshots);
     }
 
     load().catch((err) => {

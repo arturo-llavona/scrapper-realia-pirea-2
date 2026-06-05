@@ -72,7 +72,11 @@ python -m venv .venv
 . .\.venv\Scripts\Activate.ps1
 pip install -r requirements.txt
 
-python .\scrapper.py --insecure --out .\realia_data\last_run.json --export-static .\docs\data
+python .\scrapper.py --insecure --skip-pdf --out .\realia_data\last_run.json --export-static .\docs\data
+
+# Servir la web estática local para ver las gráficas
+python -m http.server 8080 --directory .\docs
+# Abre: http://127.0.0.1:8080
 ```
 
 ## Notas de seguridad
