@@ -536,6 +536,28 @@ def export_static_data(output_dir: str) -> dict[str, Any]:
 	pdf_export_dir = base / "pdfs"
 	pdf_export_dir.mkdir(parents=True, exist_ok=True)
 
+	def resolve_existing_exported_pdf(entry: dict[str, Any]) -> str | None:
+		"""Return existing static PDF path for historical rows without local DB path."""
+		execution_date = entry.get("execution_date")
+		typology = entry.get("typology")
+		if not execution_date or not typology:
+			return None
+
+		base_name = safe_file_name(str(typology))
+		candidates = [f"{base_name}.pdf"]
+		plan_pdf_url = entry.get("plan_pdf_url")
+		if plan_pdf_url:
+			url_extension = Path(urlparse(str(plan_pdf_url)).path).suffix.lower()
+			if url_extension and f"{base_name}{url_extension}" not in candidates:
+				candidates.insert(0, f"{base_name}{url_extension}")
+
+		for file_name in candidates:
+			candidate = pdf_export_dir / str(execution_date) / file_name
+			if candidate.exists():
+				relative = candidate.relative_to(base)
+				return f"data/{relative.as_posix()}"
+		return None
+
 	snapshots = query_snapshots(limit=5000)
 	exported_pdfs = 0
 	static_snapshots: list[dict[str, Any]] = []
@@ -557,6 +579,9 @@ def export_static_data(output_dir: str) -> dict[str, Any]:
 				shutil.copy2(source, target)
 				pdf_data_path = f"data/pdfs/{relative_pdf_path.as_posix()}"
 				exported_pdfs += 1
+
+		if not pdf_data_path:
+			pdf_data_path = resolve_existing_exported_pdf(entry)
 
 		entry["plan_pdf_data_path"] = pdf_data_path
 		entry["has_pdf"] = bool(pdf_data_path)
