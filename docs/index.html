@@ -258,6 +258,20 @@
       return value.toLocaleString('es-ES', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 });
     }
 
+    async function resolvePdfHref(row) {
+      if (!row) return null;
+      if (row.plan_pdf_data_path) return `./${row.plan_pdf_data_path}`;
+      return null;
+    }
+
+    async function loadJson(url) {
+      const resp = await fetch(url, { cache: 'no-store' });
+      if (!resp.ok) {
+        throw new Error(`No se pudo leer ${url} (HTTP ${resp.status})`);
+      }
+      return resp.json();
+    }
+
     function groupByExecution(snapshots) {
       const byExecution = new Map();
       for (const row of snapshots) {
@@ -455,13 +469,10 @@
     }
 
     async function load() {
-      const [snapResp, statusResp] = await Promise.all([
-        fetch('./data/snapshots.json', { cache: 'no-store' }),
-        fetch('./data/status.json', { cache: 'no-store' }),
+      const [snapshots, status] = await Promise.all([
+        loadJson('./data/snapshots.json'),
+        loadJson('./data/status.json'),
       ]);
-
-      const snapshots = await snapResp.json();
-      const status = await statusResp.json();
 
       const rows = document.getElementById('rows');
       const total = document.getElementById('total');
@@ -511,7 +522,12 @@
 
     load().catch((err) => {
       console.error(err);
-      alert('No se pudieron cargar los datos. Ejecuta primero el workflow.');
+      const usingFileProtocol = window.location.protocol === 'file:';
+      if (usingFileProtocol) {
+        alert('No se pudieron cargar los datos porque el HTML está abierto como archivo local (file://). Inicia un servidor en la carpeta docs: python -m http.server 8080 --directory .\\docs y abre http://127.0.0.1:8080');
+        return;
+      }
+      alert(`No se pudieron cargar los datos: ${err?.message || 'error desconocido'}`);
     });
   </script>
 </body>
