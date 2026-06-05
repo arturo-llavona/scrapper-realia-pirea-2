@@ -9,7 +9,7 @@ import re
 import shutil
 import sqlite3
 from datetime import datetime, timezone
-from html import unescape
+from html import escape, unescape
 from pathlib import Path
 from typing import Any
 from urllib.parse import urlparse
@@ -685,13 +685,24 @@ def send_telegram_message(token: str, chat_id: str, text: str, timeout: int = 20
 		"chat_id": chat_id,
 		"text": text,
 		"disable_web_page_preview": True,
-		"parse_mode": "HTML"
+		"parse_mode": "HTML",
 	}
 	response = requests.post(endpoint, json=payload, timeout=timeout)
-	response.raise_for_status()
-	result = response.json()
-	if not result.get("ok"):
-		raise RuntimeError(f"Telegram API error: {result}")
+	result: dict[str, Any] | None = None
+	try:
+		result = response.json()
+	except Exception:
+		result = None
+
+	if response.status_code >= 400:
+		description = None
+		if isinstance(result, dict):
+			description = result.get("description")
+		detail = description or response.text
+		raise RuntimeError(f"Telegram HTTP {response.status_code}: {detail}")
+
+	if not isinstance(result, dict) or not result.get("ok"):
+		raise RuntimeError(f"Telegram API error: {result or response.text}")
 
 
 def format_execution_time(executed_at: str | None, tz_name: str = "Europe/Madrid") -> str:
@@ -716,6 +727,9 @@ def build_telegram_message(
 	units: list[dict[str, Any]] | None,
 	notify_no_changes: bool,
 ) -> str | None:
+	def tg(value: Any) -> str:
+		return escape(str(value), quote=False)
+
 	changes = history.get("changes", [])
 	changes_count = history.get("changes_count", 0)
 	execution_date = history.get("execution_date", "-")
@@ -729,36 +743,41 @@ def build_telegram_message(
 		return None
 
 	lines = [
-		"Resumen de información de la Web de Realia para la promoción <b>Pireo II</b><br>",
-		f"<b>Fecha:</b> {execution_date}",
-		f"<b>Hora ejecución (Madrid):</b> {hour_text}",
-		f"<b>Viviendas leídas:</b> {units_count}",
-		f"<b>Cambios detectados:</b> {changes_count}",
+		"📊 <b>Resumen Realia - Pireo II</b>",
+		f"🗓️ <b>Fecha:</b> {tg(execution_date)}",
+		f"🕒 <b>Hora ejecución</b> <i>(Madrid)</i>: {tg(hour_text)}",
+		f"🏠 <b>Viviendas leídas:</b> {units_count}",
+		f"🔄 <b>Cambios detectados:</b> {changes_count}",
 	]
 
 	if units:
 		lines.append("")
-		lines.append("<b>Detalle leído:</b>")
+		lines.append("<b>Detalle leído</b>")
 		for unit in units:
-			typology = unit.get("typology") or "-"
-			home = unit.get("home") or "-"
-			price = unit.get("price_from") or "-"
-			bedrooms = unit.get("bedrooms") or "-"
-			square_meters = unit.get("square_meters") or "-"
-			lines.append(f"- {typology} | {home} | {price} | {bedrooms} hab | {square_meters} m2")
+			typology = tg(unit.get("typology") or "-")
+			home = tg(unit.get("home") or "-")
+			price = tg(unit.get("price_from") or "-")
+			bedrooms = tg(unit.get("bedrooms") or "-")
+			square_meters = tg(unit.get("square_meters") or "-")
+			lines.append(
+				f"• <b>{typology}</b> | {home} | 💶 <b>{price}</b> | {bedrooms} hab | {square_meters} m²"
+			)
 
 	if changes:
 		lines.append("")
-		lines.append("<b>Cambios vs ejecución anterior:</b>")
+		lines.append("⚠️ <b>Cambios vs ejecución anterior</b>")
 		for item in changes:
-			typology = item.get("typology", "-")
-			home = item.get("home") or "-"
-			previous_price = item.get("previous_price_from") or "-"
-			price = item.get("price_from") or "-"
-			lines.append(f"- {typology} | {home}: {previous_price} -> {price}")
+			typology = tg(item.get("typology", "-"))
+			home = tg(item.get("home") or "-")
+			previous_price = tg(item.get("previous_price_from") or "-")
+			price = tg(item.get("price_from") or "-")
+			lines.append(f"• <b>{typology}</b> | {home}: <code>{previous_price}</code> → <code>{price}</code>")
+	else:
+		lines.append("")
+		lines.append("✅ <i>Sin cambios respecto a la ejecución anterior.</i>")
 
 	lines.append("")
-	lines.append(f"URL: {url}")
+	lines.append(f"🔗 <b>URL:</b> {tg(url)}")
 
 	message = "\n".join(lines)
 	max_chars = 3900
