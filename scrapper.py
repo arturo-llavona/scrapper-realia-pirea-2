@@ -8,6 +8,7 @@ import os
 import re
 import shutil
 import sqlite3
+import time
 from datetime import datetime, timezone
 from html import escape, unescape
 from pathlib import Path
@@ -229,18 +230,69 @@ def fetch_html(
 	timeout: int = 30,
 	verify: bool | str = True,
 ) -> str:
-	headers = {
+	base_headers = {
 		"User-Agent": (
 			"Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
 			"AppleWebKit/537.36 (KHTML, like Gecko) "
 			"Chrome/125.0.0.0 Safari/537.36"
-		)
+		),
+		"Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+		"Accept-Language": "es-ES,es;q=0.9,en;q=0.8",
+		"Cache-Control": "no-cache",
+		"Pragma": "no-cache",
+		"Referer": "https://www.realia.es/",
 	}
+	headers_profiles = [
+		base_headers,
+		{
+			**base_headers,
+			"Sec-Fetch-Dest": "document",
+			"Sec-Fetch-Mode": "navigate",
+			"Sec-Fetch-Site": "same-origin",
+			"Sec-Fetch-User": "?1",
+			"Upgrade-Insecure-Requests": "1",
+		},
+	]
+	last_error: requests.RequestException | None = None
 	if verify is False:
 		urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
-	response = requests.get(url, headers=headers, timeout=timeout, verify=verify)
-	response.raise_for_status()
-	return response.text
+
+	for profile_index, headers in enumerate(headers_profiles, start=1):
+		for attempt in range(1, 3):
+			try:
+				response = requests.get(url, headers=headers, timeout=timeout, verify=verify)
+				response.raise_for_status()
+				return response.text
+			except requests.HTTPError as exc:
+				last_error = exc
+				status_code = exc.response.status_code if exc.response is not None else None
+				is_last_try = profile_index == len(headers_profiles) and attempt == 2
+				if status_code == 415 and not is_last_try:
+					logger.warning(
+						"HTTP 415 al obtener HTML (perfil=%s intento=%s), reintentando con cabeceras alternativas",
+						profile_index,
+						attempt,
+					)
+					time.sleep(1)
+					continue
+				raise
+			except requests.RequestException as exc:
+				last_error = exc
+				is_last_try = profile_index == len(headers_profiles) and attempt == 2
+				if not is_last_try:
+					logger.warning(
+						"Error de red al obtener HTML (perfil=%s intento=%s): %s",
+						profile_index,
+						attempt,
+						exc,
+					)
+					time.sleep(1)
+					continue
+				raise
+
+	if last_error is not None:
+		raise last_error
+	raise RuntimeError("No se pudo obtener el HTML de la página objetivo")
 
 
 def extract_prices_section(html: str) -> str:
