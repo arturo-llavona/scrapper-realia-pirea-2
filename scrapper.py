@@ -388,19 +388,37 @@ def extract_units(lines: list[str], section_html: str) -> list[dict]:
 
 
 def scrape_prices(url: str, verify: bool | str = True) -> dict:
-	html = fetch_html(url, verify=verify)
-	prices_section = extract_prices_section(html)
-	lines = html_to_lines(prices_section)
-	units = extract_units(lines, prices_section)
+	max_retries = 3
+	last_error: Exception | None = None
 
-	return {
-		"url": url,
-		"scraped_at": datetime.now(timezone.utc).isoformat(),
-		"section": "prices",
-		"units_count": len(units),
-		"units": units,
-		"raw_lines_preview": lines[:30],
-	}
+	for attempt in range(1, max_retries + 1):
+		try:
+			html = fetch_html(url, verify=verify)
+			prices_section = extract_prices_section(html)
+			lines = html_to_lines(prices_section)
+			units = extract_units(lines, prices_section)
+
+			return {
+				"url": url,
+				"scraped_at": datetime.now(timezone.utc).isoformat(),
+				"section": "prices",
+				"units_count": len(units),
+				"units": units,
+				"raw_lines_preview": lines[:30],
+			}
+		except ValueError as exc:
+			last_error = exc
+			if "No se encontró section#prices" in str(exc):
+				if attempt < max_retries:
+					logger.warning(f"Intento {attempt}: No se encontró section#prices. Reintentando en 2 segundos...")
+					time.sleep(2)
+					continue
+			raise
+
+	# Si llegamos aquí, significa que ocurrió un error en el último intento
+	if last_error:
+		raise last_error
+	raise RuntimeError("Error desconocido en scrape_prices")
 
 
 def persist_snapshot(
