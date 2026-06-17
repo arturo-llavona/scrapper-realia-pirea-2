@@ -731,14 +731,16 @@ def run_scrape_cycle(
 	)
 	data["history"] = persistence_result
 
-	notify_telegram(
-		telegram_token=telegram_token,
-		telegram_chat_id=telegram_chat_id,
-		url=url,
-		history=persistence_result,
-		units=data.get("units", []),
-		notify_no_changes=telegram_notify_no_changes,
-	)
+	# Solo enviar notificación si se detectaron cambios
+	if persistence_result.get("changes_count", 0) > 0:
+		notify_telegram(
+			telegram_token=telegram_token,
+			telegram_chat_id=telegram_chat_id,
+			url=url,
+			history=persistence_result,
+			units=data.get("units", []),
+			notify_no_changes=telegram_notify_no_changes,
+		)
 
 	if output_path:
 		output = Path(output_path)
