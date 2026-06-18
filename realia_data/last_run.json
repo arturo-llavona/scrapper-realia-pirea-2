@@ -1,6 +1,6 @@
 {
   "url": "https://www.realia.es/promociones-obra-nueva/promociones-obra-nueva-madrid/pireo-ii",
-  "scraped_at": "2026-06-17T05:01:00.053128+00:00",
+  "scraped_at": "2026-06-18T05:01:10.709685+00:00",
   "section": "prices",
   "units_count": 3,
   "units": [
@@ -68,9 +68,9 @@
     "Desde"
   ],
   "history": {
-    "execution_id": "20260617T0501000531280000",
-    "execution_date": "2026-06-17",
-    "executed_at": "2026-06-17T05:01:00.053128+00:00",
+    "execution_id": "20260618T0501107096850000",
+    "execution_date": "2026-06-18",
+    "executed_at": "2026-06-18T05:01:10.709685+00:00",
     "units_count": 3,
     "changes_count": 0,
     "changes": []
