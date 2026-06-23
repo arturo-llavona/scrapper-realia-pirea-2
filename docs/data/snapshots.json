@@ -1,8 +1,8 @@
 [
   {
-    "execution_id": "20260622T0501085225790000",
-    "execution_date": "2026-06-22",
-    "executed_at": "2026-06-22T05:01:08.522579+00:00",
+    "execution_id": "20260623T0501052124770000",
+    "execution_date": "2026-06-23",
+    "executed_at": "2026-06-23T05:01:05.212477+00:00",
     "typology": "T01",
     "price_from": "732.100€",
     "price_value": 732100.0,
@@ -14,15 +14,15 @@
     "garage_spots": "2",
     "storage_room": "1",
     "plan_pdf_url": "https://www.realia.es/storage/Promociones/Planos/99997/210911-a00vi00001jbool-a0cvi000005iz65-1779436799w3pbt.pdf",
-    "plan_pdf_local_path": "/home/runner/work/scrapper-realia-pirea-2/scrapper-realia-pirea-2/realia_data/pdfs/20260622T0501085225790000/T01_Esc._5_Pl._1_Pt._b.pdf",
+    "plan_pdf_local_path": "/home/runner/work/scrapper-realia-pirea-2/scrapper-realia-pirea-2/realia_data/pdfs/20260623T0501052124770000/T01_Esc._5_Pl._1_Pt._b.pdf",
     "has_pdf": true,
     "has_pdf_url": true,
-    "plan_pdf_data_path": "data/pdfs/20260622T0501085225790000/T01_Esc._5_Pl._1_Pt._b.pdf"
+    "plan_pdf_data_path": "data/pdfs/20260623T0501052124770000/T01_Esc._5_Pl._1_Pt._b.pdf"
   },
   {
-    "execution_id": "20260622T0501085225790000",
-    "execution_date": "2026-06-22",
-    "executed_at": "2026-06-22T05:01:08.522579+00:00",
+    "execution_id": "20260623T0501052124770000",
+    "execution_date": "2026-06-23",
+    "executed_at": "2026-06-23T05:01:05.212477+00:00",
     "typology": "T02",
     "price_from": "580.400€",
     "price_value": 580400.0,
@@ -34,15 +34,15 @@
     "garage_spots": "2",
     "storage_room": "1",
     "plan_pdf_url": "https://www.realia.es/storage/Promociones/Planos/99997/210911-a00vi00001jbool-a0cvi000005iz9j-1779436799g4WPd.pdf",
-    "plan_pdf_local_path": "/home/runner/work/scrapper-realia-pirea-2/scrapper-realia-pirea-2/realia_data/pdfs/20260622T0501085225790000/T02_Esc._3_Pl._1_Pt._b.pdf",
+    "plan_pdf_local_path": "/home/runner/work/scrapper-realia-pirea-2/scrapper-realia-pirea-2/realia_data/pdfs/20260623T0501052124770000/T02_Esc._3_Pl._1_Pt._b.pdf",
     "has_pdf": true,
     "has_pdf_url": true,
-    "plan_pdf_data_path": "data/pdfs/20260622T0501085225790000/T02_Esc._3_Pl._1_Pt._b.pdf"
+    "plan_pdf_data_path": "data/pdfs/20260623T0501052124770000/T02_Esc._3_Pl._1_Pt._b.pdf"
   },
   {
-    "execution_id": "20260622T0501085225790000",
-    "execution_date": "2026-06-22",
-    "executed_at": "2026-06-22T05:01:08.522579+00:00",
+    "execution_id": "20260623T0501052124770000",
+    "execution_date": "2026-06-23",
+    "executed_at": "2026-06-23T05:01:05.212477+00:00",
     "typology": "T04",
     "price_from": "600.900€",
     "price_value": 600900.0,
@@ -54,10 +54,10 @@
     "garage_spots": "2",
     "storage_room": "1",
     "plan_pdf_url": "https://www.realia.es/storage/Promociones/Planos/99997/210911-a00vi00001jbool-a0cvi000005izcx-1779436799XUyw9.pdf",
-    "plan_pdf_local_path": "/home/runner/work/scrapper-realia-pirea-2/scrapper-realia-pirea-2/realia_data/pdfs/20260622T0501085225790000/T04_Esc._2_Pl._2_Pt._b.pdf",
+    "plan_pdf_local_path": "/home/runner/work/scrapper-realia-pirea-2/scrapper-realia-pirea-2/realia_data/pdfs/20260623T0501052124770000/T04_Esc._2_Pl._2_Pt._b.pdf",
     "has_pdf": true,
     "has_pdf_url": true,
-    "plan_pdf_data_path": "data/pdfs/20260622T0501085225790000/T04_Esc._2_Pl._2_Pt._b.pdf"
+    "plan_pdf_data_path": "data/pdfs/20260623T0501052124770000/T04_Esc._2_Pl._2_Pt._b.pdf"
   },
   {
     "execution_id": "20260607T1307595493710000",
