@@ -731,8 +731,8 @@ def run_scrape_cycle(
 	)
 	data["history"] = persistence_result
 
-	# Solo enviar notificación si se detectaron cambios
-	if persistence_result.get("changes_count", 0) > 0:
+	# Enviar notificación si hay cambios o si se fuerza notificar sin cambios.
+	if persistence_result.get("changes_count", 0) > 0 or telegram_notify_no_changes:
 		notify_telegram(
 			telegram_token=telegram_token,
 			telegram_chat_id=telegram_chat_id,
