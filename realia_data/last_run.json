@@ -1,9 +1,19 @@
 {
   "url": "https://www.realia.es/promociones-obra-nueva/promociones-obra-nueva-madrid/pireo-ii",
-  "scraped_at": "2026-07-02T05:01:10.304870+00:00",
+  "scraped_at": "2026-07-02T12:10:52.885400+00:00",
   "section": "prices",
-  "units_count": 3,
+  "units_count": 4,
   "units": [
+    {
+      "typology": "B12",
+      "price_from": "550.000€",
+      "home": "Esc. 8 Pl. Baja Pt. a",
+      "bedrooms": null,
+      "square_meters": null,
+      "garage_spots": "2",
+      "storage_room": "1",
+      "plan_pdf": "https://www.realia.es/storage/Promociones/Planos/99997/210911-a00vi00001jbool-a0cvi000005iz4t-1779436799WSm4x.pdf"
+    },
     {
       "typology": "T02",
       "price_from": "580.400€",
@@ -37,6 +47,18 @@
   ],
   "raw_lines_preview": [
     "Deseo conocer más de las tipologías",
+    "B12",
+    "Desde",
+    "550.000€",
+    "2 Dormitorios",
+    "117.6 m²",
+    "Viviendas",
+    "Esc. 8 Pl. Baja Pt. a",
+    "Nº plazas garaje",
+    "2",
+    "Trastero",
+    "1",
+    "Descargar planos",
     "T02",
     "Desde",
     "580.400€",
@@ -53,25 +75,13 @@
     "Desde",
     "600.900€",
     "3 Dormitorios",
-    "154.85 m²",
-    "Viviendas",
-    "Esc. 2 Pl. 2ª Pt. b",
-    "Nº plazas garaje",
-    "2",
-    "Trastero",
-    "1",
-    "Descargar planos",
-    "T01",
-    "Desde",
-    "732.100€",
-    "4 Dormitorios",
-    "216.6 m²"
+    "154.85 m²"
   ],
   "history": {
-    "execution_id": "20260702T0501103048700000",
+    "execution_id": "20260702T1210528854000000",
     "execution_date": "2026-07-02",
-    "executed_at": "2026-07-02T05:01:10.304870+00:00",
-    "units_count": 3,
+    "executed_at": "2026-07-02T12:10:52.885400+00:00",
+    "units_count": 4,
     "changes_count": 0,
     "changes": []
   }
