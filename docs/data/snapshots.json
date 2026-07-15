@@ -1,8 +1,8 @@
 [
   {
-    "execution_id": "20260714T0501378658270000",
-    "execution_date": "2026-07-14",
-    "executed_at": "2026-07-14T05:01:37.865827+00:00",
+    "execution_id": "20260715T0501340917290000",
+    "execution_date": "2026-07-15",
+    "executed_at": "2026-07-15T05:01:34.091729+00:00",
     "typology": "B12",
     "price_from": "550.000€",
     "price_value": 550000.0,
@@ -14,15 +14,15 @@
     "garage_spots": "2",
     "storage_room": "1",
     "plan_pdf_url": "https://www.realia.es/storage/Promociones/Planos/99997/210911-a00vi00001jbool-a0cvi000005iz4t-1779436799WSm4x.pdf",
-    "plan_pdf_local_path": "/home/runner/work/scrapper-realia-pirea-2/scrapper-realia-pirea-2/realia_data/pdfs/20260714T0501378658270000/B12_Esc._8_Pl._Baja_Pt._a.pdf",
+    "plan_pdf_local_path": "/home/runner/work/scrapper-realia-pirea-2/scrapper-realia-pirea-2/realia_data/pdfs/20260715T0501340917290000/B12_Esc._8_Pl._Baja_Pt._a.pdf",
     "has_pdf": true,
     "has_pdf_url": true,
-    "plan_pdf_data_path": "data/pdfs/20260714T0501378658270000/B12_Esc._8_Pl._Baja_Pt._a.pdf"
+    "plan_pdf_data_path": "data/pdfs/20260715T0501340917290000/B12_Esc._8_Pl._Baja_Pt._a.pdf"
   },
   {
-    "execution_id": "20260714T0501378658270000",
-    "execution_date": "2026-07-14",
-    "executed_at": "2026-07-14T05:01:37.865827+00:00",
+    "execution_id": "20260715T0501340917290000",
+    "execution_date": "2026-07-15",
+    "executed_at": "2026-07-15T05:01:34.091729+00:00",
     "typology": "T01",
     "price_from": "732.100€",
     "price_value": 732100.0,
@@ -34,35 +34,15 @@
     "garage_spots": "2",
     "storage_room": "1",
     "plan_pdf_url": "https://www.realia.es/storage/Promociones/Planos/99997/210911-a00vi00001jbool-a0cvi000005iz65-1779436799w3pbt.pdf",
-    "plan_pdf_local_path": "/home/runner/work/scrapper-realia-pirea-2/scrapper-realia-pirea-2/realia_data/pdfs/20260714T0501378658270000/T01_Esc._5_Pl._1_Pt._b.pdf",
+    "plan_pdf_local_path": "/home/runner/work/scrapper-realia-pirea-2/scrapper-realia-pirea-2/realia_data/pdfs/20260715T0501340917290000/T01_Esc._5_Pl._1_Pt._b.pdf",
     "has_pdf": true,
     "has_pdf_url": true,
-    "plan_pdf_data_path": "data/pdfs/20260714T0501378658270000/T01_Esc._5_Pl._1_Pt._b.pdf"
+    "plan_pdf_data_path": "data/pdfs/20260715T0501340917290000/T01_Esc._5_Pl._1_Pt._b.pdf"
   },
   {
-    "execution_id": "20260714T0501378658270000",
-    "execution_date": "2026-07-14",
-    "executed_at": "2026-07-14T05:01:37.865827+00:00",
-    "typology": "T02",
-    "price_from": "580.400€",
-    "price_value": 580400.0,
-    "previous_price_from": "580.400€",
-    "price_changed": false,
-    "home": "Esc. 3 Pl. 1ª Pt. b",
-    "bedrooms": null,
-    "square_meters": null,
-    "garage_spots": "2",
-    "storage_room": "1",
-    "plan_pdf_url": "https://www.realia.es/storage/Promociones/Planos/99997/210911-a00vi00001jbool-a0cvi000005iz9j-1779436799g4WPd.pdf",
-    "plan_pdf_local_path": "/home/runner/work/scrapper-realia-pirea-2/scrapper-realia-pirea-2/realia_data/pdfs/20260714T0501378658270000/T02_Esc._3_Pl._1_Pt._b.pdf",
-    "has_pdf": true,
-    "has_pdf_url": true,
-    "plan_pdf_data_path": "data/pdfs/20260714T0501378658270000/T02_Esc._3_Pl._1_Pt._b.pdf"
-  },
-  {
-    "execution_id": "20260714T0501378658270000",
-    "execution_date": "2026-07-14",
-    "executed_at": "2026-07-14T05:01:37.865827+00:00",
+    "execution_id": "20260715T0501340917290000",
+    "execution_date": "2026-07-15",
+    "executed_at": "2026-07-15T05:01:34.091729+00:00",
     "typology": "T04",
     "price_from": "600.900€",
     "price_value": 600900.0,
@@ -74,10 +54,10 @@
     "garage_spots": "2",
     "storage_room": "1",
     "plan_pdf_url": "https://www.realia.es/storage/Promociones/Planos/99997/210911-a00vi00001jbool-a0cvi000005izcx-1779436799XUyw9.pdf",
-    "plan_pdf_local_path": "/home/runner/work/scrapper-realia-pirea-2/scrapper-realia-pirea-2/realia_data/pdfs/20260714T0501378658270000/T04_Esc._2_Pl._2_Pt._b.pdf",
+    "plan_pdf_local_path": "/home/runner/work/scrapper-realia-pirea-2/scrapper-realia-pirea-2/realia_data/pdfs/20260715T0501340917290000/T04_Esc._2_Pl._2_Pt._b.pdf",
     "has_pdf": true,
     "has_pdf_url": true,
-    "plan_pdf_data_path": "data/pdfs/20260714T0501378658270000/T04_Esc._2_Pl._2_Pt._b.pdf"
+    "plan_pdf_data_path": "data/pdfs/20260715T0501340917290000/T04_Esc._2_Pl._2_Pt._b.pdf"
   },
   {
     "execution_id": "20260607T1307595493710000",
