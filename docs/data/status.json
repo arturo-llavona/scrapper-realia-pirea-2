@@ -1,13 +1,13 @@
 {
-  "generated_at": "2026-07-15T05:01:37.545970+00:00",
-  "records": 12,
+  "generated_at": "2026-07-16T05:01:31.543501+00:00",
+  "records": 10,
   "changes": 0,
-  "exported_pdfs": 3,
+  "exported_pdfs": 1,
   "last_run": {
-    "execution_id": "20260715T0501340917290000",
-    "execution_date": "2026-07-15",
-    "executed_at": "2026-07-15T05:01:34.091729+00:00",
+    "execution_id": "20260716T0501308491080000",
+    "execution_date": "2026-07-16",
+    "executed_at": "2026-07-16T05:01:30.849108+00:00",
     "url": "https://www.realia.es/promociones-obra-nueva/promociones-obra-nueva-madrid/pireo-ii",
-    "units_count": 3
+    "units_count": 1
   }
 }
